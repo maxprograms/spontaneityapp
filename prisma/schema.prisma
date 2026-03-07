@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
     provider = "prisma-client-js"
     output   = "../generated/prisma"
@@ -8,23 +5,82 @@ generator client {
 
 datasource db {
     provider = "postgresql"
-    // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-    // Further reading:
-    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+// Basic enums
+enum UserRole {
+    ADMIN
+    CLIENT
+}
 
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
+enum FriendshipStatus {
+    PENDING
+    ACCEPTED
+    BLOCKED
+}
 
-    @@index([name])
+enum AvailabilityStatus {
+    AVAILABLE
+    UNAVAILABLE
+}
+
+// User to many Schedule
+model Schedule {
+    id            String   @id @default(cuid()) // primary key 
+    userId        String  // foreign key refernces User table
+    classCode     String? // (e.g. COP3530,    null)
+    locationName  String? // (e.g. class room, Marston Library)  
+    buildingCode  String? // (e.g  CSE,        LIB)
+    startDateTime DateTime
+    endDateTime   DateTime
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+
+    // Defines the relationship between Schedule and User
+    // Relation "user" points to "User" model
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    // For queries like "find all schedules for a user" much faster
+    @@index([userId])
+    // For queries invloving the time
+    @@index([startDateTime])
+}
+
+// User to User relation
+model Friendship {
+    id          String           @id @default(cuid())
+    requesterId String
+    addresseeId String
+    status      FriendshipStatus @default(PENDING)
+    createdAt   DateTime         @default(now())
+    updatedAt   DateTime         @updatedAt
+
+    requester User @relation("FriendRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+    addressee User @relation("FriendAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+    @@unique([requesterId, addresseeId])
+}
+
+// User Model!
+model User {
+    id            String    @id @default(cuid())
+    firstName     String?
+    lastName      String?
+    email         String?   @unique
+    emailVerified DateTime?
+    image         String?
+
+    role          UserRole @default(CLIENT)
+    availability  AvailabilityStatus @default(AVAILABLE)
+
+    accounts      Account[]
+    sessions      Session[]
+
+    schedules     Schedule[]
+
+    sentFriendRequests     Friendship[] @relation("FriendRequester")
+    receivedFriendRequests Friendship[] @relation("FriendAddressee")
 }
 
 // Necessary for Next auth
@@ -34,12 +90,12 @@ model Account {
     type                     String
     provider                 String
     providerAccountId        String
-    refresh_token            String? // @db.Text
-    access_token             String? // @db.Text
+    refresh_token            String? 
+    access_token             String?
     expires_at               Int?
     token_type               String?
     scope                    String?
-    id_token                 String? // @db.Text
+    id_token                 String? 
     session_state            String?
     user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
     refresh_token_expires_in Int?
@@ -55,17 +111,6 @@ model Session {
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    posts         Post[]
-}
-
 model VerificationToken {
     identifier String
     token      String   @unique
@@ -73,3 +118,5 @@ model VerificationToken {
 
     @@unique([identifier, token])
 }
+
+
