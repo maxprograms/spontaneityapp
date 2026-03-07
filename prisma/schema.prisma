@@ -20,6 +20,11 @@ enum FriendShipStatus {
     BLOCKED
 }
 
+enum AvailabilityStatus {
+    AVAILABLE
+    UNAVAILABLE
+}
+
 // User to many Schedule
 model Schedule {
     id            String   @id @default(cuid()) // primary key 
@@ -67,6 +72,7 @@ model User {
     image         String?
 
     role          UserRole @default(CLIENT)
+    availability  AvailabilityStatus @default(AVAILABLE)
 
     accounts      Account[]
     sessions      Session[]
