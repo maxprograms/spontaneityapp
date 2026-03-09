@@ -1,122 +1,125 @@
 generator client {
-    provider = "prisma-client-js"
-    output   = "../generated/prisma"
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // Basic enums
 enum UserRole {
-    ADMIN
-    CLIENT
+  ADMIN
+  CLIENT
 }
 
 enum FriendshipStatus {
-    PENDING
-    ACCEPTED
-    BLOCKED
+  PENDING
+  ACCEPTED
+  BLOCKED
 }
 
 enum AvailabilityStatus {
-    AVAILABLE
-    UNAVAILABLE
+  AVAILABLE
+  UNAVAILABLE
 }
 
 // User to many Schedule
 model Schedule {
-    id            String   @id @default(cuid()) // primary key 
-    userId        String  // foreign key refernces User table
-    classCode     String? // (e.g. COP3530,    null)
-    locationName  String? // (e.g. class room, Marston Library)  
-    buildingCode  String? // (e.g  CSE,        LIB)
-    startDateTime DateTime
-    endDateTime   DateTime
-    createdAt     DateTime @default(now())
-    updatedAt     DateTime @updatedAt
+  id            String             @id @default(cuid()) // primary key 
+  userId        String // foreign key refernces User table
+  classCode     String? // (e.g. COP3530,    null)
+  locationName  String? // (e.g. class room, Marston Library)  
+  buildingCode  String // (e.g  CSE,        LIB)
+  status        AvailabilityStatus
+  startDateTime DateTime
+  endDateTime   DateTime
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
 
-    // Defines the relationship between Schedule and User
-    // Relation "user" points to "User" model
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Defines the relationship between Schedule and User
+  // Relation "user" points to "User" model
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    // For queries like "find all schedules for a user" much faster
-    @@index([userId])
-    // For queries invloving the time
-    @@index([startDateTime])
+  // For queries like "find all schedules for a user" much faster
+  @@index([userId])
+  // For queries invloving the time
+  @@index([startDateTime])
 }
 
 // User to User relation
 model Friendship {
-    id          String           @id @default(cuid())
-    requesterId String
-    addresseeId String
-    status      FriendshipStatus @default(PENDING)
-    createdAt   DateTime         @default(now())
-    updatedAt   DateTime         @updatedAt
+  id          String           @id @default(cuid())
+  requesterId String
+  addresseeId String
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
-    requester User @relation("FriendRequester", fields: [requesterId], references: [id], onDelete: Cascade)
-    addressee User @relation("FriendAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+  requester User @relation("FriendRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee User @relation("FriendAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
 
-    @@unique([requesterId, addresseeId])
+  @@unique([requesterId, addresseeId])
 }
 
 // User Model!
 model User {
-    id            String    @id @default(cuid())
-    firstName     String?
-    lastName      String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
+  id            String    @id @default(cuid())
+  firstName     String
+  lastName      String
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
 
-    role          UserRole @default(CLIENT)
-    availability  AvailabilityStatus @default(AVAILABLE)
+  role UserRole @default(CLIENT)
 
-    accounts      Account[]
-    sessions      Session[]
+  // maybe add feature in sprint 2
+  // for now avialbility determined in schedule
+  // maybe have default building location if user says they are available?
+  // availability  AvailabilityStatus @default(AVAILABLE)
 
-    schedules     Schedule[]
+  accounts Account[]
+  sessions Session[]
 
-    sentFriendRequests     Friendship[] @relation("FriendRequester")
-    receivedFriendRequests Friendship[] @relation("FriendAddressee")
+  schedules Schedule[]
+
+  sentFriendRequests     Friendship[] @relation("FriendRequester")
+  receivedFriendRequests Friendship[] @relation("FriendAddressee")
 }
 
 // Necessary for Next auth
 model Account {
-    id                       String  @id @default(cuid())
-    userId                   String
-    type                     String
-    provider                 String
-    providerAccountId        String
-    refresh_token            String? 
-    access_token             String?
-    expires_at               Int?
-    token_type               String?
-    scope                    String?
-    id_token                 String? 
-    session_state            String?
-    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-    refresh_token_expires_in Int?
+  id                       String  @id @default(cuid())
+  userId                   String
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String?
+  access_token             String?
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String?
+  session_state            String?
+  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refresh_token_expires_in Int?
 
-    @@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId])
 }
 
 model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+  identifier String
+  token      String   @unique
+  expires    DateTime
 
-    @@unique([identifier, token])
+  @@unique([identifier, token])
 }
-
-
