@@ -31,7 +31,7 @@ model Schedule {
     userId        String  // foreign key refernces User table
     classCode     String? // (e.g. COP3530,    null)
     locationName  String? // (e.g. class room, Marston Library)  
-    buildingCode  String? // (e.g  CSE,        LIB)
+    buildingCode  String // (e.g  CSE,        LIB)
     startDateTime DateTime
     endDateTime   DateTime
     createdAt     DateTime @default(now())
@@ -65,8 +65,8 @@ model Friendship {
 // User Model!
 model User {
     id            String    @id @default(cuid())
-    firstName     String?
-    lastName      String?
+    firstName     String
+    lastName      String
     email         String?   @unique
     emailVerified DateTime?
     image         String?
