@@ -83,6 +83,14 @@ model User {
     receivedFriendRequests Friendship[] @relation("FriendAddressee")
 }
 
+// location Model
+model Location {
+  id        String  @id
+  name      String
+  latitude  Float
+  longitude Float
+}
+
 // Necessary for Next auth
 model Account {
     id                       String  @id @default(cuid())
