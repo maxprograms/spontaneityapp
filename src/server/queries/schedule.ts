@@ -28,7 +28,7 @@ export async function createSchedule(
 export async function getScheduleForUser(userId: string) {
     return db.schedule.findMany({
         where: {userId},
-        orderBy: {startDateTime: "asc"}, // sorts schedules cronologically
+        orderBy: {startDateTime: "asc"}, // sorts schedules chronologically
     });
 }
 
@@ -41,13 +41,22 @@ export async function userAvailabilityAtTime(userId: string, time: Date) {
             startDateTime: {lte: time},
             endDateTime: {gt:time}
         },
-        select: {status: true}
+        select: {
+            status: true, 
+            buildingCode: true
+        }
     });
 
     // if user has no schedule at that time -> they are neither availbale/unavailable -> return false
     if (!scheduleEntry) {
-        return false;
+        return {
+            available: false, // we can modify with additional features in sprint 2
+            buildingCode: null
+        };
     }
 
-    return scheduleEntry.status === AvailabilityStatus.AVAILABLE; // if availble returns true 
+    return {
+        available: scheduleEntry.status === AvailabilityStatus.AVAILABLE, // if availble returns true 
+        buildingCode: scheduleEntry.buildingCode,
+    };
 }
