@@ -71,6 +71,7 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  bio           String?
 
   role UserRole @default(CLIENT)
 
@@ -90,7 +91,7 @@ model User {
 
 // location Model
 model Location {
-  id        String  @id
+  id        String @id
   name      String
   latitude  Float
   longitude Float

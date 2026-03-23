@@ -11,6 +11,7 @@ export async function getUserOrThrow(userId: string) {
             lastName: true,
             email: true,
             image: true,
+            bio: true,
             role: true,
         },
     });
@@ -62,6 +63,7 @@ export async function getAllUsers() {
             lastName: true,
             email: true,
             image: true,
+            bio: true,
             role: true,
         },
     
