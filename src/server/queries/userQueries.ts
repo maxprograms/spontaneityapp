@@ -7,6 +7,7 @@ export async function getUserOrThrow(userId: string) {
         where: { id: userId },
         select: {
             id: true,
+            name: true,
             firstName: true,
             lastName: true,
             email: true,
@@ -59,6 +60,7 @@ export async function getAllUsers() {
     return db.user.findMany({
         select: {
             id: true,
+            name: true,
             firstName: true,
             lastName: true,
             email: true,
@@ -78,8 +80,8 @@ export async function getAllUsers() {
 
 
 type UpdateUserInput = {
-    firstName?: string;
-    lastName?: string;
+    firstName?: string | null;
+    lastName?: string | null;
     image?: string | null;
 };
 
@@ -110,6 +112,7 @@ export async function updateUserProfile(
         
         select: {
             id: true,
+            name: true,
             firstName: true,
             lastName: true,
             email: true,
