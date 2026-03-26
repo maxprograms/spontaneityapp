@@ -1,28 +1,24 @@
-// import { redirect } from "next/navigation";
-// import { auth } from "~/server/auth";
-// import { getUserById } from "~/server/queries/userQueries";
+import { redirect } from "next/navigation";
+import { auth } from "~/server/auth";
+import { getUserById } from "~/server/queries/userQueries";
 
 export default async function ProfilePage() {
-    // const session = await auth();
+    const session = await auth();
 
-    // if (!session?.user?.id) {
-    //     redirect("/");
-    // }
+    if (!session?.user?.id) {
+        redirect("/");
+    }
 
-    // const user = await getUserById(session.user.id);
+    const user = await getUserById(session.user.id);
 
-    // example placeolder
-    const user = {
-        firstName: "John",
-        lastName: "Ronchetto",
-        email: "john@example.com",
-        image: null,
-        bio: "Computer Science and Statistics student ",
-        role: "CLIENT",
-    };
+    const fullName =
+        `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() ||
+        user.name ||
+        "Unnamed User";
 
-    const fullName = `${user.firstName} ${user.lastName}`;
-    const initials = `${user.firstName[0] ?? ""}${user.lastName[0] ?? ""}`;
+    const initials =
+        `${user.firstName?.[0] ?? user.name?.[0] ?? "U"}${user.lastName?.[0] ?? ""}`;
+
     const roleLabel = user.role.charAt(0) + user.role.slice(1).toLowerCase();
 
     return (
