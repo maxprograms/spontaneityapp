@@ -89,15 +89,52 @@ class Graph {
         this.get_or_create_cell(new_i, new_j).push(location);
     }
 
+    // MIDPOINT CALCULATIONS: Takes two Locations
+    findMeetupSpots(
+        a: Location,
+        b: Location,
+        maxCellRadius: number = 3,
+        limit: number = 5
+    ): { location: Location; distance: number }[] {
+
+        const midLat = (a.lat + b.lat) / 2;
+        const midLng = (a.lng + b.lng) / 2;
+
+        // distance function
+        const distance = (aLat: number, aLng: number, bLat: number, bLng: number): number => {
+            return Math.sqrt((bLat - aLat) ** 2 + (bLng - aLng) ** 2);
+        };
+
+        let candidates: Location[] = [];
+        for (let radius = 0; radius <= maxCellRadius; radius++) {
+            candidates = this.get_within_radius(midLat, midLng, radius);
+            if (candidates.length > 0) break;
+        }
+
+        if (candidates.length === 0) return [];
+
+        // maps each potential location to its distance from the true midpoint
+        const with_distances = candidates.map(loc => ({
+            location: loc,
+            distance: distance(midLat, midLng, loc.lat, loc.lng),
+        }));
+
+        const sorted = with_distances.sort((a, b) => a.distance - b.distance);
+
+        return sorted.slice(0, limit);
+    }
+
     get_location(id: string): Location | undefined {
         return this.location_index.get(id);
     }
 
+    // search within single cell
     get_nearby(lat: number, lng: number): Location[] {
         const [i, j] = this.get_cell(lat, lng);
         return this.grid.get(i)?.get(j) ?? [];
     }
 
+    // search within a specific cell radius
     get_within_radius(lat: number, lng: number, cell_radius: number): Location[] {
         const [ci, cj] = this.get_cell(lat, lng);
         const results: Location[] = [];
