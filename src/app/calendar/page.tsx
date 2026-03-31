@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react";
 import { api } from "~/trpc/react";
-import Navbar from "~/components/Navbar";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -216,7 +215,6 @@ export default function CalendarPage() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <Navbar />
       <header className="bg-white border-t border-gray-100">
         <div className="mx-auto px-6 py-4">
           <h1 className="text-2xl font-bold text-gray-900">Calendar</h1>

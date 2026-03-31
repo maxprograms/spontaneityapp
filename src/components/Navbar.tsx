@@ -11,6 +11,8 @@ const links = [
 export default function Navbar() {
   const pathname = usePathname();
 
+  if (pathname === "/login") return null;
+
   return (
     <nav className="bg-white shadow-sm">
       <div className="mx-auto flex items-center justify-between px-6 py-4">

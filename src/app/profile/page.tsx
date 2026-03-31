@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "~/server/auth";
 import { getUserById } from "~/server/queries/userQueries";
-import Navbar from "~/components/Navbar";
 
 export default async function ProfilePage() {
     const session = await auth();
@@ -24,7 +23,6 @@ export default async function ProfilePage() {
 
     return (
         <main className="min-h-screen bg-[#f5f5f7]">
-        <Navbar />
         <div className="px-4 py-12">
             <div className="mx-auto max-w-3xl">
                 <div className="rounded-[28px] border border-black/10 bg-white px-8 py-12 shadow-sm">
