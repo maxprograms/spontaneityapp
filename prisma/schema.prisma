@@ -66,18 +66,16 @@ model Friendship {
 // User Model!
 model User {
   id            String    @id @default(cuid())
-  firstName     String
-  lastName      String
+  name          String?
+  firstName     String?
+  lastName      String?
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  bio           String?
 
   role UserRole @default(CLIENT)
-
-  // maybe add feature in sprint 2
-  // for now avialbility determined in schedule
-  // maybe have default building location if user says they are available?
-  // availability  AvailabilityStatus @default(AVAILABLE)
+  availability  AvailabilityStatus @default(AVAILABLE)
 
   accounts Account[]
   sessions Session[]
@@ -86,6 +84,14 @@ model User {
 
   sentFriendRequests     Friendship[] @relation("FriendRequester")
   receivedFriendRequests Friendship[] @relation("FriendAddressee")
+}
+
+// location Model
+model Location {
+  id        String @id
+  name      String
+  latitude  Float
+  longitude Float
 }
 
 // Necessary for Next auth
