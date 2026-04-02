@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 import { auth } from "~/server/auth";
 import { getUserById } from "~/server/queries/userQueries";
+import { getFriends } from "~/server/queries/FriendshipQueries";
+import ProfileEditor from "./profileEditor";
+import FriendsSection from "./friendsSection";
 
 export default async function ProfilePage() {
     const session = await auth();
@@ -10,6 +13,7 @@ export default async function ProfilePage() {
     }
 
     const user = await getUserById(session.user.id);
+    const friendsData = await getFriends(session.user.id);
 
     const fullName =
         `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() ||
@@ -23,7 +27,8 @@ export default async function ProfilePage() {
 
     return (
         <main className="min-h-screen bg-[#f5f5f7] px-4 py-12">
-            <div className="mx-auto max-w-3xl">
+            <div className="mx-auto max-w-3xl space-y-8">
+                {/* ── Profile Card ── */}
                 <div className="rounded-[28px] border border-black/10 bg-white px-8 py-12 shadow-sm">
                     <div className="mx-auto flex h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-neutral-200">
                         {user.image ? (
@@ -52,12 +57,6 @@ export default async function ProfilePage() {
                         {user.email ?? "No email available"}
                     </p>
 
-                    <div className="mt-4 flex justify-center">
-                        <button className="rounded-xl bg-[#050522] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90">
-                            Edit Profile
-                        </button>
-                    </div>
-
                     <div className="mt-8 grid gap-6 md:grid-cols-2">
                         <div className="rounded-2xl border border-black/10 bg-[#fafafa] p-6">
                             <h2 className="text-lg font-semibold text-black">Full Name</h2>
@@ -71,14 +70,18 @@ export default async function ProfilePage() {
                             </p>
                         </div>
 
-                        <div className="rounded-2xl border border-black/10 bg-[#fafafa] p-6 md:col-span-2">
-                            <h2 className="text-lg font-semibold text-black">Bio</h2>
-                            <p className="mt-2 text-neutral-700">
-                                {user.bio?.trim() || "No bio added yet."}
-                            </p>
+                        {/* Bio is the editable section — client component handles toggle */}
+                        <div className="md:col-span-2">
+                            <ProfileEditor
+                                userId={user.id}
+                                initialBio={user.bio ?? ""}
+                            />
                         </div>
                     </div>
                 </div>
+
+                {/* ── Friends Section ── */}
+                <FriendsSection friends={friendsData} />
             </div>
         </main>
     );
