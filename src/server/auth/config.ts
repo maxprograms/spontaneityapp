@@ -12,6 +12,13 @@ declare module "next-auth" {
       lastName: string;
     } & DefaultSession["user"];
   }
+
+  // Extend the built-in User so profile() can pass firstName/lastName
+  // through to the adapter's createUser call.
+  interface User {
+    firstName?: string | null;
+    lastName?: string | null;
+  }
 }
 
 export const authConfig = {
@@ -26,6 +33,18 @@ export const authConfig = {
           access_type: "offline",
           prompt: "consent",
         },
+      },
+      // profile() runs before the adapter creates the user, so these fields
+      // are included in the very first DB insert.
+      profile(profile) {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+          firstName: profile.given_name ?? null,
+          lastName: profile.family_name ?? null,
+        };
       },
     }),
   ],
@@ -43,28 +62,6 @@ export const authConfig = {
       }
 
       return session;
-    },
-    signIn: async ({ user, account, profile }) => {
-      if (account?.provider === "google" && profile) {
-        const googleProfile = profile as { given_name?: string; family_name?: string };
-
-        const existingUser = await db.user.findUnique({
-          where: { id: user.id },
-        });
-
-        if (!existingUser) {
-          await db.user.create({
-            data: {
-              id: user.id,
-              firstName: googleProfile.given_name ?? "Unknown",
-              lastName: googleProfile.family_name ?? "User",
-              email: user.email,
-              image: user.image,
-            },
-          });
-        }
-      }
-      return true;
     },
   },
 } satisfies NextAuthConfig;
