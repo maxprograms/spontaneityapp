@@ -3,7 +3,7 @@ async function Buildings() {
     const data = await fet.json();
 
     //The structure of the data base is typically features->properties->Whatever we need
-    const locations = data.features.map((feature: any) => ({//Quick fix with the any
+    const locations = data.features.map((feature) => ({//Quick fix with the any
         id: feature.properties.PropSTCode, //Unsure here as there is a PropSTCode and a PropCID
         name: feature.properties.PropName,
         latitude: feature.properties.Latitude,
