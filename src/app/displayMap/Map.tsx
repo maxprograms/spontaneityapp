@@ -10,7 +10,7 @@ type LocationPoint = {
   longitude: number;
 };
 
-const MAP_IMAGE_URL ="";
+const MAP_IMAGE_URL ="https://static.wixstatic.com/media/5fe702_ca834e8870534dfeac5d82c59800cdb3~mv2.png/v1/fill/w_1380,h_866,al_c,q_90,usm_0.66_1.00_0.01,enc_avif,quality_auto/Screenshot%202024-01-13%20at%202_26_55%20PM.png";
 
 function boundary(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
