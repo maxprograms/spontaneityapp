@@ -36,7 +36,14 @@ export const authConfig = {
       },
       // profile() runs before the adapter creates the user, so these fields
       // are included in the very first DB insert.
-      profile(profile) {
+      profile(profile: {
+        sub: string;
+        name?: string;
+        email?: string;
+        picture?: string;
+        given_name?: string;
+        family_name?: string;
+      }) {
         return {
           id: profile.sub,
           name: profile.name,
@@ -57,8 +64,8 @@ export const authConfig = {
 
       if (dbUser) {
         session.user.id = dbUser.id;
-        session.user.firstName = dbUser.firstName;
-        session.user.lastName = dbUser.lastName;
+        session.user.firstName = dbUser.firstName ?? "";
+        session.user.lastName = dbUser.lastName ?? "";
       }
 
       return session;

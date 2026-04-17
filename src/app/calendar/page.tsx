@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { api } from "~/trpc/react";
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -41,7 +42,14 @@ type UIEvent = {
 };
 
 function dbEventToUI(
-  event: { id: string; title: string | null; locationName: string | null; startDateTime: Date; endDateTime: Date; googleEventId: string | null },
+  event: {
+    id: string;
+    title: string | null;
+    locationName: string | null;
+    startDateTime: Date;
+    endDateTime: Date;
+    googleEventId: string | null;
+  },
   weekStart: Date,
 ): UIEvent | null {
   const start = new Date(event.startDateTime);
@@ -96,10 +104,11 @@ export default function CalendarPage() {
 
   const utils = api.useUtils();
 
-  const { data: dbEvents = [], isLoading } = api.schedule.getWeekEvents.useQuery(
-    { weekStart },
-    { refetchOnWindowFocus: false },
-  );
+  const { data: dbEvents = [], isLoading } =
+    api.schedule.getWeekEvents.useQuery(
+      { weekStart },
+      { refetchOnWindowFocus: false },
+    );
 
   const createEvent = api.schedule.createEvent.useMutation({
     onSuccess: () => void utils.schedule.getWeekEvents.invalidate(),
@@ -141,8 +150,16 @@ export default function CalendarPage() {
     e.preventDefault();
     if (!formData.title.trim()) return;
 
-    const startDateTime = buildDateTime(weekStart, formData.day, formData.startHour);
-    const endDateTime = buildDateTime(weekStart, formData.day, formData.endHour);
+    const startDateTime = buildDateTime(
+      weekStart,
+      formData.day,
+      formData.startHour,
+    );
+    const endDateTime = buildDateTime(
+      weekStart,
+      formData.day,
+      formData.endHour,
+    );
 
     if (editingId) {
       updateEvent.mutate({
@@ -209,7 +226,9 @@ export default function CalendarPage() {
   // ── Grid helpers ──────────────────────────────────────────────────────────────
 
   const getEventAtSlot = (day: number, hour: number) =>
-    events.find((e) => e.day === day && hour >= e.startHour && hour < e.endHour);
+    events.find(
+      (e) => e.day === day && hour >= e.startHour && hour < e.endHour,
+    );
 
   // ── Render ────────────────────────────────────────────────────────────────────
 
@@ -218,9 +237,9 @@ export default function CalendarPage() {
       <header className="bg-white shadow-sm">
         <div className="mx-auto flex items-center justify-between px-6 py-4">
           <h1 className="text-2xl font-bold text-gray-900">Calendar</h1>
-          <a href="/" className="text-purple-600 hover:underline">
+          <Link href="/" className="text-purple-600 hover:underline">
             ← Back to Home
-          </a>
+          </Link>
         </div>
       </header>
 
@@ -259,7 +278,13 @@ export default function CalendarPage() {
               onClick={() => {
                 setShowForm(!showForm);
                 setEditingId(null);
-                setFormData({ title: "", day: 0, startHour: 9, endHour: 10, location: "" });
+                setFormData({
+                  title: "",
+                  day: 0,
+                  startHour: 9,
+                  endHour: 10,
+                  location: "",
+                });
               }}
               className="rounded-md bg-purple-600 px-4 py-2 text-sm text-white hover:bg-purple-700"
             >
@@ -293,7 +318,7 @@ export default function CalendarPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, title: e.target.value })
                   }
-                  className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                  className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none"
                   required
                 />
               </div>
@@ -306,11 +331,14 @@ export default function CalendarPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, day: parseInt(e.target.value) })
                   }
-                  className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                  className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none"
                 >
                   {DAYS.map((day, index) => (
                     <option key={day} value={index}>
-                      {day} {formatDate(new Date(weekStart.getTime() + index * 86400000))}
+                      {day}{" "}
+                      {formatDate(
+                        new Date(weekStart.getTime() + index * 86400000),
+                      )}
                     </option>
                   ))}
                 </select>
@@ -327,7 +355,7 @@ export default function CalendarPage() {
                       startHour: parseInt(e.target.value),
                     })
                   }
-                  className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                  className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none"
                 >
                   {HOURS.map((hour) => (
                     <option key={hour} value={hour}>
@@ -348,7 +376,7 @@ export default function CalendarPage() {
                       endHour: parseInt(e.target.value),
                     })
                   }
-                  className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                  className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none"
                 >
                   {HOURS.filter((h) => h > formData.startHour).map((hour) => (
                     <option key={hour} value={hour}>
@@ -368,7 +396,7 @@ export default function CalendarPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, location: e.target.value })
                   }
-                  className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                  className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none"
                 />
               </div>
               <div className="flex items-end gap-2 sm:col-span-5">
@@ -398,9 +426,7 @@ export default function CalendarPage() {
               >
                 <div>{day}</div>
                 <div className="text-xs font-normal">
-                  {formatDate(
-                    new Date(weekStart.getTime() + index * 86400000),
-                  )}
+                  {formatDate(new Date(weekStart.getTime() + index * 86400000))}
                 </div>
               </div>
             ))}
@@ -414,7 +440,10 @@ export default function CalendarPage() {
               </div>
             ) : (
               HOURS.map((hour) => (
-                <div key={hour} className="grid grid-cols-8 border-b border-gray-100">
+                <div
+                  key={hour}
+                  className="grid grid-cols-8 border-b border-gray-100"
+                >
                   <div className="border-r border-gray-200 bg-gray-50 p-2 py-4 text-right text-xs text-gray-500">
                     {formatHour(hour)}
                   </div>
@@ -433,13 +462,15 @@ export default function CalendarPage() {
                       >
                         {isStart && event && (
                           <div
-                            className={`absolute left-1 right-1 top-1 z-10 rounded-md p-2 text-xs text-white shadow-sm ${
+                            className={`absolute top-1 right-1 left-1 z-10 rounded-md p-2 text-xs text-white shadow-sm ${
                               event.fromGoogle
                                 ? "bg-blue-500"
                                 : "cursor-pointer bg-purple-500 hover:bg-purple-600"
                             }`}
                             style={{ height: `${height}px` }}
-                            onClick={() => !event.fromGoogle && handleEdit(event)}
+                            onClick={() =>
+                              !event.fromGoogle && handleEdit(event)
+                            }
                           >
                             <div className="truncate font-medium">
                               {event.title}
@@ -467,7 +498,7 @@ export default function CalendarPage() {
         {events.length > 0 && (
           <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              This Week's Events
+              This Week&apos;s Events
             </h2>
             <div className="space-y-2">
               {events.map((event) => (

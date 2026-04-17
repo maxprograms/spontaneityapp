@@ -1,8 +1,10 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { PrismaClient } from "../../../../generated/prisma";
+import type { PrismaClient } from "../../../../generated/prisma";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { AvailabilityStatus } from "../../../../generated/prisma";
+
+/* eslint-disable @typescript-eslint/prefer-optional-chain */
 
 // ── Google Calendar helpers ──────────────────────────────────────────────────
 
@@ -20,7 +22,11 @@ async function getValidAccessToken(
   const now = Math.floor(Date.now() / 1000);
 
   // Token still valid
-  if (tokens.access_token && tokens.expires_at && tokens.expires_at > now + 60) {
+  if (
+    tokens.access_token &&
+    tokens.expires_at &&
+    tokens.expires_at > now + 60
+  ) {
     return tokens.access_token;
   }
 
@@ -227,11 +233,13 @@ export const scheduleRouter = createTRPCRouter({
   // Sync events from Google Calendar into the DB (read-only from Google's side)
   syncGoogleCalendar: protectedProcedure
     .input(
-      z.object({
-        // Sync window: default to 4 weeks from today if not specified
-        timeMin: z.date().optional(),
-        timeMax: z.date().optional(),
-      }).optional(),
+      z
+        .object({
+          // Sync window: default to 4 weeks from today if not specified
+          timeMin: z.date().optional(),
+          timeMax: z.date().optional(),
+        })
+        .optional(),
     )
     .mutation(async ({ ctx, input }) => {
       const account = await ctx.db.account.findFirst({
@@ -262,7 +270,11 @@ export const scheduleRouter = createTRPCRouter({
         input?.timeMax ??
         new Date(now.getFullYear(), now.getMonth(), now.getDate() + 28);
 
-      const events = await fetchGoogleCalendarEvents(accessToken, timeMin, timeMax);
+      const events = await fetchGoogleCalendarEvents(
+        accessToken,
+        timeMin,
+        timeMax,
+      );
 
       let synced = 0;
 
