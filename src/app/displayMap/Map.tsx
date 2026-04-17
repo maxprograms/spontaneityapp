@@ -32,7 +32,6 @@ const suggestionIcon = new L.Icon({
 
 const UF_CENTER: [number, number] = [29.6436, -82.3549];
 
-type Spot = { id: string; name: string; lat: number; lng: number; distance?: number };
 
 function FitBounds({ spots }: { spots: [number, number][] }) {
   const map = useMap();
@@ -61,7 +60,7 @@ export default function Map() {
 
   const selectedFriend = friends.find((f) => f.friend.id === selectedFriendId);
   const friendName = selectedFriend
-    ? (`${selectedFriend.friend.firstName ?? ""} ${selectedFriend.friend.lastName ?? ""}`.trim() || selectedFriend.friend.name || "Friend")
+    ? ((`${selectedFriend.friend.firstName ?? ""} ${selectedFriend.friend.lastName ?? ""}`.trim() || selectedFriend.friend.name) ?? "Friend")
     : null;
 
   const boundsPoints: [number, number][] = [
@@ -85,7 +84,7 @@ export default function Map() {
           ) : (
             <ul className="space-y-1">
               {friends.map(({ friend, friendshipId }) => {
-                const name = `${friend.firstName ?? ""} ${friend.lastName ?? ""}`.trim() || friend.name || "Unknown";
+                const name = (`${friend.firstName ?? ""} ${friend.lastName ?? ""}`.trim() || friend.name) ?? "Unknown";
                 const isSelected = friend.id === selectedFriendId;
                 return (
                   <li key={friendshipId}>
