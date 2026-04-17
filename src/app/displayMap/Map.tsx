@@ -5,7 +5,7 @@ import { api } from "~/trpc/react";
 
 type LocationPoint = {
   id: string;
-  buildingName: string;
+  name: string;
   latitude: number;
   longitude: number;
 };
@@ -20,7 +20,7 @@ export default function Map() {
   const { data, isLoading, error } = api.location.getLocation.useQuery({ query: "all" });
   const locations = (data ?? []) as LocationPoint[];
 
-  const pins = useMemo<LocationPoint & { x: number; y: number }[]>(() => {
+  const pins = useMemo<(LocationPoint & { x: number; y: number })[]>(() => {
     if (!locations.length) return [];
 
     const latitudes = locations.map((location) => location.latitude);
@@ -68,7 +68,7 @@ export default function Map() {
                 <div className="flex flex-col items-center gap-2">
                   <span className="inline-flex h-4 w-4 rounded-full bg-cyan-500 ring-2 ring-white shadow-lg shadow-cyan-500/30" />
                   <span className="rounded-full bg-slate-950/90 px-2 py-1 text-xs font-medium tracking-wide text-white shadow-sm shadow-black/20">
-                    {pin.buildingName}
+                    {pin.name}
                   </span>
                 </div>
               </div>
@@ -85,7 +85,7 @@ export default function Map() {
         <div className="grid gap-4 md:grid-cols-2">
           {pins.map((pin) => (
             <div key={pin.id} className="rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
-              <p className="font-semibold text-slate-900">{pin.buildingName}</p>
+              <p className="font-semibold text-slate-900">{pin.name}</p>
               <p className="mt-1 text-sm text-slate-600">
                 Latitude: {pin.latitude.toFixed(5)}, Longitude: {pin.longitude.toFixed(5)}
               </p>
