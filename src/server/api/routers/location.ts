@@ -6,6 +6,6 @@ export const locationRouter = createTRPCRouter({
     getLocation: publicProcedure
         .input(z.object({ query: z.string() }))
         .query(async () => {
-            return getAllLocations
+            return getAllLocations()
         }),
 });
