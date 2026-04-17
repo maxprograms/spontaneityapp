@@ -1,12 +1,12 @@
-interface Location {
+export interface Location {
   id: string;
   name: string;
   lat: number;
   lng: number;
 }
 
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-inferrable-types */
-class Graph {
+/* eslint-disable @typescript-eslint/no-inferrable-types */
+export class Graph {
   private cell_size: number;
   private grid: Map<number, Map<number, Location[]>>;
   private location_index: Map<string, Location>;
