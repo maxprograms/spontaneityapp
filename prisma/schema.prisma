@@ -27,25 +27,24 @@ enum AvailabilityStatus {
 
 // User to many Schedule
 model Schedule {
-  id            String             @id @default(cuid()) // primary key 
+  id            String             @id @default(cuid()) // primary key
   userId        String // foreign key refernces User table
+  title         String? // human-readable event name
   classCode     String? // (e.g. COP3530,    null)
-  locationName  String? // (e.g. class room, Marston Library)  
-  buildingCode  String // (e.g  CSE,        LIB)
+  locationName  String? // (e.g. class room, Marston Library)
+  buildingCode  String? // (e.g  CSE,        LIB)
+  googleEventId String? // Google Calendar event ID for sync/upsert
   status        AvailabilityStatus
   startDateTime DateTime
   endDateTime   DateTime
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
 
-  // Defines the relationship between Schedule and User
-  // Relation "user" points to "User" model
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // For queries like "find all schedules for a user" much faster
   @@index([userId])
-  // For queries invloving the time
   @@index([startDateTime])
+  @@unique([userId, googleEventId])
 }
 
 // User to User relation
