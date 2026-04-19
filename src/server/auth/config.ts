@@ -23,23 +23,6 @@ declare module "next-auth" {
   }
 }
 
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-      firstName: string;
-      lastName: string;
-    } & DefaultSession["user"];
-  }
-
-  // Extend the built-in User so profile() can pass firstName/lastName
-  // through to the adapter's createUser call.
-  interface User {
-    firstName?: string | null;
-    lastName?: string | null;
-  }
-}
-
 export const authConfig = {
   providers: [
     GoogleProvider({
@@ -85,7 +68,7 @@ export const authConfig = {
         session.user.id = dbUser.id;
         session.user.firstName = dbUser.firstName ?? "";
         session.user.lastName = dbUser.lastName ?? "";
-        role: user.role,
+        session.user.role = dbUser.role;
       }
 
       return session;
