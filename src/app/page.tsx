@@ -4,6 +4,8 @@ import { auth } from "~/server/auth";
 
 export default async function Home() {
   const session = await auth();
+  //----- DEBUG ------
+  console.log("SESSION:", JSON.stringify(session, null, 2))
 
   return (
     <main className="flex min-h-screen flex-col">
@@ -18,12 +20,22 @@ export default async function Home() {
           <h1 className="text-2xl font-bold tracking-tight">Spontaneity</h1>
           <div className="flex gap-4">
             {session ? (
+            <>
               <Link
                 href="/dashboard"
                 className="rounded-full bg-white px-6 py-2 font-semibold text-purple-900 transition hover:bg-white/90"
               >
                 Dashboard
               </Link>
+              {session.user.role === "ADMIN" && (
+                <Link
+                  href="/admin"
+                  className="rounded-full bg-white/10 px-6 py-2 font-semibold transition hover:bg-white/20"
+                >
+                  Admin
+                </Link>
+              )}
+            </>
             ) : (
               <>
                 <Link
