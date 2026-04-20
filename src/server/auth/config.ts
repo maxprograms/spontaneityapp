@@ -19,7 +19,7 @@ declare module "next-auth" {
   interface User {
     firstName?: string | null;
     lastName?: string | null;
-    role: string;
+    role?: string;
   }
 }
 
@@ -53,6 +53,7 @@ export const authConfig = {
           image: profile.picture,
           firstName: profile.given_name ?? null,
           lastName: profile.family_name ?? null,
+          role: "CLIENT",
         };
       },
     }),
