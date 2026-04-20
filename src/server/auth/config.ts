@@ -5,12 +5,21 @@ import GoogleProvider from "next-auth/providers/google";
 import { db } from "~/server/db";
 
 declare module "next-auth" {
-  interface Session {
+  interface Session extends DefaultSession {
     user: {
       id: string;
       firstName: string;
       lastName: string;
+      role: string;
     } & DefaultSession["user"];
+  }
+
+  // Extend the built-in User so profile() can pass firstName/lastName
+  // through to the adapter's createUser call.
+  interface User {
+    firstName?: string | null;
+    lastName?: string | null;
+    role?: string;
   }
 }
 
@@ -27,6 +36,26 @@ export const authConfig = {
           prompt: "consent",
         },
       },
+      // profile() runs before the adapter creates the user, so these fields
+      // are included in the very first DB insert.
+      profile(profile: {
+        sub: string;
+        name?: string;
+        email?: string;
+        picture?: string;
+        given_name?: string;
+        family_name?: string;
+      }) {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+          firstName: profile.given_name ?? null,
+          lastName: profile.family_name ?? null,
+          role: "CLIENT",
+        };
+      },
     }),
   ],
   adapter: PrismaAdapter(db),
@@ -38,33 +67,12 @@ export const authConfig = {
 
       if (dbUser) {
         session.user.id = dbUser.id;
-        session.user.firstName = dbUser.firstName;
-        session.user.lastName = dbUser.lastName;
+        session.user.firstName = dbUser.firstName ?? "";
+        session.user.lastName = dbUser.lastName ?? "";
+        session.user.role = dbUser.role;
       }
 
       return session;
-    },
-    signIn: async ({ user, account, profile }) => {
-      if (account?.provider === "google" && profile) {
-        const googleProfile = profile as { given_name?: string; family_name?: string };
-
-        const existingUser = await db.user.findUnique({
-          where: { id: user.id },
-        });
-
-        if (!existingUser) {
-          await db.user.create({
-            data: {
-              id: user.id,
-              firstName: googleProfile.given_name ?? "Unknown",
-              lastName: googleProfile.family_name ?? "User",
-              email: user.email,
-              image: user.image,
-            },
-          });
-        }
-      }
-      return true;
     },
   },
 } satisfies NextAuthConfig;
