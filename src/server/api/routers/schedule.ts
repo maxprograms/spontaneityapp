@@ -288,6 +288,8 @@ export const scheduleRouter = createTRPCRouter({
         const startDateTime = new Date(startStr);
         const endDateTime = new Date(endStr);
 
+        const buildingCode = event.location?.match(/^[A-Z]+/)?.[0] ?? null;
+
         await ctx.db.schedule.upsert({
           where: {
             userId_googleEventId: {
@@ -299,6 +301,7 @@ export const scheduleRouter = createTRPCRouter({
             userId: ctx.session.user.id,
             title: event.summary ?? "(No title)",
             locationName: event.location,
+            buildingCode,
             googleEventId: event.id,
             status: AvailabilityStatus.UNAVAILABLE,
             startDateTime,
@@ -307,6 +310,7 @@ export const scheduleRouter = createTRPCRouter({
           update: {
             title: event.summary ?? "(No title)",
             locationName: event.location,
+            buildingCode,
             startDateTime,
             endDateTime,
           },
