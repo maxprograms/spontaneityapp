@@ -6,6 +6,8 @@ async function seedLocations() {
   const res = await fetch("https://campusmap.ufl.edu/assets/boundaries.json");
   const data = await res.json() as { features: any[] };
 
+  const seenNames = new Set<string>();
+
   const locations = data.features
     .map((feature: any) => ({
       id: feature.properties.PropSTCode as string,
@@ -19,7 +21,12 @@ async function seedLocations() {
         loc.name &&
         loc.latitude != null &&
         loc.longitude != null
-    );
+    )
+    .filter((loc) => {
+      if (seenNames.has(loc.name)) return false;
+      seenNames.add(loc.name);
+      return true;
+    });
 
   const result = await db.location.createMany({
     data: locations,
