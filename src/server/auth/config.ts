@@ -5,11 +5,12 @@ import GoogleProvider from "next-auth/providers/google";
 import { db } from "~/server/db";
 
 declare module "next-auth" {
-  interface Session {
+  interface Session extends DefaultSession {
     user: {
       id: string;
       firstName: string;
       lastName: string;
+      role: string;
     } & DefaultSession["user"];
   }
 
@@ -18,6 +19,7 @@ declare module "next-auth" {
   interface User {
     firstName?: string | null;
     lastName?: string | null;
+    role: string;
   }
 }
 
@@ -66,6 +68,7 @@ export const authConfig = {
         session.user.id = dbUser.id;
         session.user.firstName = dbUser.firstName ?? "";
         session.user.lastName = dbUser.lastName ?? "";
+        session.user.role = dbUser.role;
       }
 
       return session;
