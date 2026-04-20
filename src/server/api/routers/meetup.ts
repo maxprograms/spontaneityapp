@@ -31,8 +31,11 @@ export const meetupRouter = createTRPCRouter({
         }
       }
 
-      const myLoc = myAvail.buildingCode ? graph.get_location(myAvail.buildingCode) : null;
-      const friendLoc = friendAvail.buildingCode ? graph.get_location(friendAvail.buildingCode) : null;
+      const myMatch = myAvail.buildingCode ? allLocations.find(l => l.buildingCode === myAvail.buildingCode) : null;
+      const friendMatch = friendAvail.buildingCode ? allLocations.find(l => l.buildingCode === friendAvail.buildingCode) : null;
+
+      const myLoc = myMatch ? graph.get_location(myMatch.id) : null;
+      const friendLoc = friendMatch ? graph.get_location(friendMatch.id) : null;
 
       const suggestions =
         myLoc && friendLoc

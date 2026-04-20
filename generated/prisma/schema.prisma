@@ -87,10 +87,11 @@ model User {
 
 // location Model
 model Location {
-  id        String @id
-  name      String
-  latitude  Float
-  longitude Float
+  id           String  @id
+  name         String
+  buildingCode String?
+  latitude     Float
+  longitude    Float
 }
 
 // Necessary for Next auth

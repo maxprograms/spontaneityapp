@@ -5015,6 +5015,7 @@ export namespace Prisma {
   export type LocationMinAggregateOutputType = {
     id: string | null
     name: string | null
+    buildingCode: string | null
     latitude: number | null
     longitude: number | null
   }
@@ -5022,6 +5023,7 @@ export namespace Prisma {
   export type LocationMaxAggregateOutputType = {
     id: string | null
     name: string | null
+    buildingCode: string | null
     latitude: number | null
     longitude: number | null
   }
@@ -5029,6 +5031,7 @@ export namespace Prisma {
   export type LocationCountAggregateOutputType = {
     id: number
     name: number
+    buildingCode: number
     latitude: number
     longitude: number
     _all: number
@@ -5048,6 +5051,7 @@ export namespace Prisma {
   export type LocationMinAggregateInputType = {
     id?: true
     name?: true
+    buildingCode?: true
     latitude?: true
     longitude?: true
   }
@@ -5055,6 +5059,7 @@ export namespace Prisma {
   export type LocationMaxAggregateInputType = {
     id?: true
     name?: true
+    buildingCode?: true
     latitude?: true
     longitude?: true
   }
@@ -5062,6 +5067,7 @@ export namespace Prisma {
   export type LocationCountAggregateInputType = {
     id?: true
     name?: true
+    buildingCode?: true
     latitude?: true
     longitude?: true
     _all?: true
@@ -5156,6 +5162,7 @@ export namespace Prisma {
   export type LocationGroupByOutputType = {
     id: string
     name: string
+    buildingCode: string | null
     latitude: number
     longitude: number
     _count: LocationCountAggregateOutputType | null
@@ -5182,6 +5189,7 @@ export namespace Prisma {
   export type LocationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    buildingCode?: boolean
     latitude?: boolean
     longitude?: boolean
   }, ExtArgs["result"]["location"]>
@@ -5189,6 +5197,7 @@ export namespace Prisma {
   export type LocationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    buildingCode?: boolean
     latitude?: boolean
     longitude?: boolean
   }, ExtArgs["result"]["location"]>
@@ -5196,6 +5205,7 @@ export namespace Prisma {
   export type LocationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    buildingCode?: boolean
     latitude?: boolean
     longitude?: boolean
   }, ExtArgs["result"]["location"]>
@@ -5203,11 +5213,12 @@ export namespace Prisma {
   export type LocationSelectScalar = {
     id?: boolean
     name?: boolean
+    buildingCode?: boolean
     latitude?: boolean
     longitude?: boolean
   }
 
-  export type LocationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "latitude" | "longitude", ExtArgs["result"]["location"]>
+  export type LocationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "buildingCode" | "latitude" | "longitude", ExtArgs["result"]["location"]>
 
   export type $LocationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Location"
@@ -5215,6 +5226,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
+      buildingCode: string | null
       latitude: number
       longitude: number
     }, ExtArgs["result"]["location"]>
@@ -5642,6 +5654,7 @@ export namespace Prisma {
   interface LocationFieldRefs {
     readonly id: FieldRef<"Location", 'String'>
     readonly name: FieldRef<"Location", 'String'>
+    readonly buildingCode: FieldRef<"Location", 'String'>
     readonly latitude: FieldRef<"Location", 'Float'>
     readonly longitude: FieldRef<"Location", 'Float'>
   }
@@ -9287,6 +9300,7 @@ export namespace Prisma {
   export const LocationScalarFieldEnum: {
     id: 'id',
     name: 'name',
+    buildingCode: 'buildingCode',
     latitude: 'latitude',
     longitude: 'longitude'
   };
@@ -9715,6 +9729,7 @@ export namespace Prisma {
     NOT?: LocationWhereInput | LocationWhereInput[]
     id?: StringFilter<"Location"> | string
     name?: StringFilter<"Location"> | string
+    buildingCode?: StringNullableFilter<"Location"> | string | null
     latitude?: FloatFilter<"Location"> | number
     longitude?: FloatFilter<"Location"> | number
   }
@@ -9722,6 +9737,7 @@ export namespace Prisma {
   export type LocationOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
+    buildingCode?: SortOrderInput | SortOrder
     latitude?: SortOrder
     longitude?: SortOrder
   }
@@ -9732,6 +9748,7 @@ export namespace Prisma {
     OR?: LocationWhereInput[]
     NOT?: LocationWhereInput | LocationWhereInput[]
     name?: StringFilter<"Location"> | string
+    buildingCode?: StringNullableFilter<"Location"> | string | null
     latitude?: FloatFilter<"Location"> | number
     longitude?: FloatFilter<"Location"> | number
   }, "id">
@@ -9739,6 +9756,7 @@ export namespace Prisma {
   export type LocationOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
+    buildingCode?: SortOrderInput | SortOrder
     latitude?: SortOrder
     longitude?: SortOrder
     _count?: LocationCountOrderByAggregateInput
@@ -9754,6 +9772,7 @@ export namespace Prisma {
     NOT?: LocationScalarWhereWithAggregatesInput | LocationScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Location"> | string
     name?: StringWithAggregatesFilter<"Location"> | string
+    buildingCode?: StringNullableWithAggregatesFilter<"Location"> | string | null
     latitude?: FloatWithAggregatesFilter<"Location"> | number
     longitude?: FloatWithAggregatesFilter<"Location"> | number
   }
@@ -10228,6 +10247,7 @@ export namespace Prisma {
   export type LocationCreateInput = {
     id: string
     name: string
+    buildingCode?: string | null
     latitude: number
     longitude: number
   }
@@ -10235,6 +10255,7 @@ export namespace Prisma {
   export type LocationUncheckedCreateInput = {
     id: string
     name: string
+    buildingCode?: string | null
     latitude: number
     longitude: number
   }
@@ -10242,6 +10263,7 @@ export namespace Prisma {
   export type LocationUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    buildingCode?: NullableStringFieldUpdateOperationsInput | string | null
     latitude?: FloatFieldUpdateOperationsInput | number
     longitude?: FloatFieldUpdateOperationsInput | number
   }
@@ -10249,6 +10271,7 @@ export namespace Prisma {
   export type LocationUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    buildingCode?: NullableStringFieldUpdateOperationsInput | string | null
     latitude?: FloatFieldUpdateOperationsInput | number
     longitude?: FloatFieldUpdateOperationsInput | number
   }
@@ -10256,6 +10279,7 @@ export namespace Prisma {
   export type LocationCreateManyInput = {
     id: string
     name: string
+    buildingCode?: string | null
     latitude: number
     longitude: number
   }
@@ -10263,6 +10287,7 @@ export namespace Prisma {
   export type LocationUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    buildingCode?: NullableStringFieldUpdateOperationsInput | string | null
     latitude?: FloatFieldUpdateOperationsInput | number
     longitude?: FloatFieldUpdateOperationsInput | number
   }
@@ -10270,6 +10295,7 @@ export namespace Prisma {
   export type LocationUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    buildingCode?: NullableStringFieldUpdateOperationsInput | string | null
     latitude?: FloatFieldUpdateOperationsInput | number
     longitude?: FloatFieldUpdateOperationsInput | number
   }
@@ -10827,6 +10853,7 @@ export namespace Prisma {
   export type LocationCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    buildingCode?: SortOrder
     latitude?: SortOrder
     longitude?: SortOrder
   }
@@ -10839,6 +10866,7 @@ export namespace Prisma {
   export type LocationMaxOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    buildingCode?: SortOrder
     latitude?: SortOrder
     longitude?: SortOrder
   }
@@ -10846,6 +10874,7 @@ export namespace Prisma {
   export type LocationMinOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    buildingCode?: SortOrder
     latitude?: SortOrder
     longitude?: SortOrder
   }
