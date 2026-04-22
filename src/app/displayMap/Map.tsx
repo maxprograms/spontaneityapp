@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
@@ -30,8 +30,13 @@ const suggestionIcon = new L.Icon({
   iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34],
 });
 
-const UF_CENTER: [number, number] = [29.6436, -82.3549];
+const confirmedIcon = new L.Icon({
+  iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34],
+});
 
+const UF_CENTER: [number, number] = [29.6436, -82.3549];
 
 function FitBounds({ spots }: { spots: [number, number][] }) {
   const map = useMap();
@@ -49,8 +54,9 @@ export default function Map() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  // Availability toggle â€” reads and writes User.availability in the DB
   const utils = api.useUtils();
+
+  // Availability toggle - reads and writes User.availability in the DB
   const { data: availability } = api.meetup.getMyAvailability.useQuery();
   const { mutate: setAvailability, isPending: isUpdating } =
     api.meetup.setAvailability.useMutation({
@@ -72,6 +78,24 @@ export default function Map() {
       { enabled: !!selectedFriendId },
     );
 
+  // Polls every 3s so both sides see state changes without a refresh
+  const { data: meetupRequest } = api.meetup.getMeetupRequest.useQuery(
+    { friendId: selectedFriendId! },
+    { enabled: !!selectedFriendId, refetchInterval: 3000 },
+  );
+
+  const { mutate: requestMeetup } = api.meetup.requestMeetup.useMutation({
+    onSuccess: () => void utils.meetup.getMeetupRequest.invalidate(),
+  });
+
+  const { mutate: respondToMeetup } = api.meetup.respondToMeetup.useMutation({
+    onSuccess: () => void utils.meetup.getMeetupRequest.invalidate(),
+  });
+
+  const { mutate: cancelMeetup } = api.meetup.cancelMeetup.useMutation({
+    onSuccess: () => void utils.meetup.getMeetupRequest.invalidate(),
+  });
+
   const selectedFriend = friends.find((f) => f.friend.id === selectedFriendId);
   const friendName = selectedFriend
     ? ((`${selectedFriend.friend.firstName ?? ""} ${selectedFriend.friend.lastName ?? ""}`.trim() || selectedFriend.friend.name) ?? "Friend")
@@ -82,14 +106,16 @@ export default function Map() {
     ...(meetupData?.friendLocation ? [[meetupData.friendLocation.lat, meetupData.friendLocation.lng] as [number, number]] : []),
   ];
 
+  const confirmedLocation = meetupRequest?.status === "ACCEPTED" ? meetupRequest.location : null;
+
   if (!mounted) return null;
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row">
-      {/* â”€â”€ Friend picker panel â”€â”€ */}
+      {/* Friend picker panel */}
       <div className="w-full shrink-0 space-y-4 lg:w-72">
 
-        {/* Availability toggle â€” persists to User.availability in DB */}
+        {/* Availability toggle - persists to User.availability in DB */}
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <h2 className="mb-3 font-semibold text-slate-900">Your status</h2>
           <button
@@ -108,11 +134,12 @@ export default function Map() {
           </button>
         </div>
 
+        {/* Friend picker */}
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <h2 className="mb-3 font-semibold text-slate-900">Meet up withâ€¦</h2>
+          <h2 className="mb-3 font-semibold text-slate-900">Meet up with...</h2>
 
           {loadingFriends ? (
-            <p className="text-sm text-slate-400">Loading friendsâ€¦</p>
+            <p className="text-sm text-slate-400">Loading friends...</p>
           ) : friends.length === 0 ? (
             <p className="text-sm text-slate-400">No friends yet. Add some from the Friends page!</p>
           ) : (
@@ -142,26 +169,86 @@ export default function Map() {
           )}
         </div>
 
-        {/* â”€â”€ Results panel â”€â”€ */}
+        {/* Results / meetup request panel */}
         {selectedFriendId && (
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            {loadingMeetup ? (
-              <p className="text-sm text-slate-400">Finding meetup spotsâ€¦</p>
+
+            {/* Meetup request states take priority over suggestions */}
+            {meetupRequest?.status === "ACCEPTED" && meetupRequest.location ? (
+              <div className="space-y-3">
+                <h3 className="font-semibold text-slate-900">Meetup confirmed!</h3>
+                <p className="text-sm text-slate-600">{meetupRequest.location.name}</p>
+                <button
+                  onClick={() => cancelMeetup({ friendId: selectedFriendId })}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-500 hover:bg-slate-50 transition"
+                >
+                  Reset
+                </button>
+              </div>
+            ) : meetupRequest?.status === "PENDING" && meetupRequest.iAmRequester ? (
+              <div className="space-y-3">
+                <h3 className="font-semibold text-slate-900">Waiting for response...</h3>
+                <p className="text-sm text-slate-500">
+                  You suggested <span className="font-medium text-slate-700">{meetupRequest.location?.name}</span> to {friendName}.
+                </p>
+                <button
+                  onClick={() => cancelMeetup({ friendId: selectedFriendId })}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-500 hover:bg-slate-50 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : meetupRequest?.status === "PENDING" && !meetupRequest.iAmRequester ? (
+              <div className="space-y-3">
+                <h3 className="font-semibold text-slate-900">Meetup suggestion</h3>
+                <p className="text-sm text-slate-600">
+                  {friendName} wants to meet at <span className="font-medium text-slate-800">{meetupRequest.location?.name}</span>.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => respondToMeetup({ friendId: selectedFriendId, accept: true })}
+                    className="flex-1 rounded-xl bg-emerald-500 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-600 transition"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    onClick={() => respondToMeetup({ friendId: selectedFriendId, accept: false })}
+                    className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-500 hover:bg-slate-50 transition"
+                  >
+                    Decline
+                  </button>
+                </div>
+              </div>
+            ) : meetupRequest?.status === "DECLINED" ? (
+              <div className="space-y-3">
+                <p className="text-sm text-slate-500">
+                  {meetupRequest.iAmRequester ? `${friendName} declined.` : "You declined."} Try another spot.
+                </p>
+                <button
+                  onClick={() => cancelMeetup({ friendId: selectedFriendId })}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-500 hover:bg-slate-50 transition"
+                >
+                  Reset
+                </button>
+              </div>
+            ) : loadingMeetup ? (
+              <p className="text-sm text-slate-400">Finding meetup spots...</p>
             ) : meetupData?.myUnavailable ? (
-              <p className="text-sm text-slate-500">You&apos;re set to unavailable. Toggle your status above to find meetup spots.</p>
+              <p className="text-sm text-slate-500">You are set to unavailable. Toggle your status above to find meetup spots.</p>
             ) : meetupData?.friendUnavailable ? (
               <p className="text-sm text-slate-500">{friendName} is currently unavailable.</p>
             ) : !meetupData?.myLocation && !meetupData?.friendLocation ? (
               <p className="text-sm text-slate-500">
-                Neither you nor {friendName} have a current schedule entry with a building code set. Meetup spots can&apos;t be calculated.
+                Neither you nor {friendName} have a current schedule entry with a building code set. Meetup spots cannot be calculated.
               </p>
             ) : !meetupData?.myLocation ? (
-              <p className="text-sm text-slate-500">You don&apos;t have a building set in your current schedule.</p>
+              <p className="text-sm text-slate-500">You do not have a building set in your current schedule.</p>
             ) : !meetupData?.friendLocation ? (
-              <p className="text-sm text-slate-500">{friendName} doesn&apos;t have a building set right now.</p>
+              <p className="text-sm text-slate-500">{friendName} does not have a building set right now.</p>
             ) : (
               <>
                 <h3 className="mb-2 font-semibold text-slate-900">Suggested meetup spots</h3>
+                <p className="mb-2 text-xs text-slate-400">Click a pin on the map to suggest a spot.</p>
                 {meetupData.suggestions.length === 0 ? (
                   <p className="text-sm text-slate-400">No nearby locations found.</p>
                 ) : (
@@ -181,15 +268,16 @@ export default function Map() {
           </div>
         )}
 
-        {/* â”€â”€ Legend â”€â”€ */}
+        {/* Legend */}
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm text-xs text-slate-500 space-y-1">
           <div className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-blue-500" /> You</div>
           <div className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-green-500" /> Friend</div>
           <div className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-orange-400" /> Suggested spots</div>
+          <div className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-yellow-400" /> Confirmed meetup</div>
         </div>
       </div>
 
-      {/* â”€â”€ Map â”€â”€ */}
+      {/* Map */}
       <div className="flex-1 lg:self-start overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
         <MapContainer center={UF_CENTER} zoom={15} style={{ height: "32rem", width: "100%" }} className="z-0">
           <TileLayer
@@ -201,21 +289,45 @@ export default function Map() {
 
           {meetupData?.myLocation && (
             <Marker position={[meetupData.myLocation.lat, meetupData.myLocation.lng]} icon={myIcon}>
-              <Popup>ðŸ“ You â€” {meetupData.myLocation.name}</Popup>
+              <Popup>You - {meetupData.myLocation.name}</Popup>
             </Marker>
           )}
 
           {meetupData?.friendLocation && (
             <Marker position={[meetupData.friendLocation.lat, meetupData.friendLocation.lng]} icon={friendIcon}>
-              <Popup>ðŸ‘¤ {friendName} â€” {meetupData.friendLocation.name}</Popup>
+              <Popup>{friendName} - {meetupData.friendLocation.name}</Popup>
             </Marker>
           )}
 
-          {meetupData?.suggestions.map((s, i) => (
-            <Marker key={s.id} position={[s.lat, s.lng]} icon={suggestionIcon}>
-              <Popup>#{i + 1} {s.name}</Popup>
+          {/* Suggestion pins - show gold if confirmed, orange otherwise */}
+          {meetupData?.suggestions.map((s, i) => {
+            const isConfirmed = confirmedLocation?.id === s.id;
+            return (
+              <Marker key={s.id} position={[s.lat, s.lng]} icon={isConfirmed ? confirmedIcon : suggestionIcon}>
+                <Popup>
+                  <div className="space-y-1">
+                    <p className="font-medium">#{i + 1} {s.name}</p>
+                    {!meetupRequest?.status && selectedFriendId && (
+                      <button
+                        onClick={() => requestMeetup({ friendId: selectedFriendId, locationId: s.id })}
+                        className="mt-1 w-full rounded bg-slate-800 px-2 py-1 text-xs text-white hover:bg-slate-700"
+                      >
+                        Suggest this spot
+                      </button>
+                    )}
+                    {isConfirmed && <p className="text-xs font-semibold text-yellow-600">Confirmed meetup spot!</p>}
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
+
+          {/* Confirmed location if not already in suggestions list */}
+          {confirmedLocation && !meetupData?.suggestions.find(s => s.id === confirmedLocation.id) && (
+            <Marker position={[confirmedLocation.lat, confirmedLocation.lng]} icon={confirmedIcon}>
+              <Popup>Confirmed meetup: {confirmedLocation.name}</Popup>
             </Marker>
-          ))}
+          )}
         </MapContainer>
       </div>
     </div>
