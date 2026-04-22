@@ -21,9 +21,9 @@ import { PrismaClient, FriendshipStatus, AvailabilityStatus } from "../generated
 const db = new PrismaClient();
 
 const FAKE_FRIENDS = [
-  { email: "alice@test.spontaneity.dev", firstName: "Alice", lastName: "Nguyen" },
-  { email: "bob@test.spontaneity.dev",   firstName: "Bob",   lastName: "Martinez" },
-  { email: "cara@test.spontaneity.dev",  firstName: "Cara",  lastName: "Osei" },
+  { email: "alice@test.spontaneity.dev", firstName: "Alice", lastName: "Nguyen",   available: true },
+  { email: "bob@test.spontaneity.dev",   firstName: "Bob",   lastName: "Martinez", available: true },
+  { email: "cara@test.spontaneity.dev",  firstName: "Cara",  lastName: "Osei",     available: false }, // unavailable — for testing the toggle block
 ];
 
 async function main() {
@@ -88,15 +88,16 @@ async function main() {
     const fake    = FAKE_FRIENDS[i]!;
     const building = friendBuildings[i % friendBuildings.length]!;
 
-    // Upsert fake user
+    // Upsert fake user, setting availability so we can test both states
     const friend = await db.user.upsert({
       where:  { email: fake.email },
-      update: {},
+      update: { availability: fake.available ? AvailabilityStatus.AVAILABLE : AvailabilityStatus.UNAVAILABLE },
       create: {
-        email:     fake.email,
-        firstName: fake.firstName,
-        lastName:  fake.lastName,
-        name:      `${fake.firstName} ${fake.lastName}`,
+        email:        fake.email,
+        firstName:    fake.firstName,
+        lastName:     fake.lastName,
+        name:         `${fake.firstName} ${fake.lastName}`,
+        availability: fake.available ? AvailabilityStatus.AVAILABLE : AvailabilityStatus.UNAVAILABLE,
       },
     });
     console.log(`Upserted fake user: ${friend.firstName} ${friend.lastName}`);
