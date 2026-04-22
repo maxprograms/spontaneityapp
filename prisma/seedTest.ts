@@ -57,6 +57,14 @@ async function main() {
     console.log(`Friend ${i + 1} building: ${b.name} (${b.id})`)
   );
 
+  // Ensure Location.buildingCode mirrors Location.id so the meetup router can match them
+  for (const loc of [myBuilding, ...friendBuildings]) {
+    await db.location.update({
+      where: { id: loc.id },
+      data: { buildingCode: loc.id },
+    });
+  }
+
   // 3. Time window: now → +2 hours
   const now     = new Date();
   const twoHours = new Date(now.getTime() + 2 * 60 * 60 * 1000);
