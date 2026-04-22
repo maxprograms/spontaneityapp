@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
@@ -49,6 +49,20 @@ export default function Map() {
 
   useEffect(() => { setMounted(true); }, []);
 
+  // Availability toggle â€” reads and writes User.availability in the DB
+  const utils = api.useUtils();
+  const { data: availability } = api.meetup.getMyAvailability.useQuery();
+  const { mutate: setAvailability, isPending: isUpdating } =
+    api.meetup.setAvailability.useMutation({
+      onSuccess: () => {
+        void utils.meetup.getMyAvailability.invalidate();
+        void utils.meetup.getMeetupSpots.invalidate();
+      },
+    });
+  const isAvailable = availability === "AVAILABLE";
+  const handleToggle = () =>
+    setAvailability({ status: isAvailable ? "UNAVAILABLE" : "AVAILABLE" });
+
   const { data: friends = [], isLoading: loadingFriends } =
     api.meetup.getFriends.useQuery();
 
@@ -72,13 +86,33 @@ export default function Map() {
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row">
-      {/* ── Friend picker panel ── */}
+      {/* â”€â”€ Friend picker panel â”€â”€ */}
       <div className="w-full shrink-0 space-y-4 lg:w-72">
+
+        {/* Availability toggle â€” persists to User.availability in DB */}
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <h2 className="mb-3 font-semibold text-slate-900">Meet up with…</h2>
+          <h2 className="mb-3 font-semibold text-slate-900">Your status</h2>
+          <button
+            onClick={handleToggle}
+            disabled={isUpdating || availability === undefined}
+            className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition disabled:opacity-50 ${
+              isAvailable
+                ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+            }`}
+          >
+            <span>{isAvailable ? "Available to meet up" : "Not available"}</span>
+            <div className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${isAvailable ? "bg-emerald-500" : "bg-slate-300"}`}>
+              <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${isAvailable ? "translate-x-5" : "translate-x-0.5"}`} />
+            </div>
+          </button>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <h2 className="mb-3 font-semibold text-slate-900">Meet up withâ€¦</h2>
 
           {loadingFriends ? (
-            <p className="text-sm text-slate-400">Loading friends…</p>
+            <p className="text-sm text-slate-400">Loading friendsâ€¦</p>
           ) : friends.length === 0 ? (
             <p className="text-sm text-slate-400">No friends yet. Add some from the Friends page!</p>
           ) : (
@@ -108,11 +142,15 @@ export default function Map() {
           )}
         </div>
 
-        {/* ── Results panel ── */}
+        {/* â”€â”€ Results panel â”€â”€ */}
         {selectedFriendId && (
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             {loadingMeetup ? (
-              <p className="text-sm text-slate-400">Finding meetup spots…</p>
+              <p className="text-sm text-slate-400">Finding meetup spotsâ€¦</p>
+            ) : meetupData?.myUnavailable ? (
+              <p className="text-sm text-slate-500">You&apos;re set to unavailable. Toggle your status above to find meetup spots.</p>
+            ) : meetupData?.friendUnavailable ? (
+              <p className="text-sm text-slate-500">{friendName} is currently unavailable.</p>
             ) : !meetupData?.myLocation && !meetupData?.friendLocation ? (
               <p className="text-sm text-slate-500">
                 Neither you nor {friendName} have a current schedule entry with a building code set. Meetup spots can&apos;t be calculated.
@@ -143,7 +181,7 @@ export default function Map() {
           </div>
         )}
 
-        {/* ── Legend ── */}
+        {/* â”€â”€ Legend â”€â”€ */}
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm text-xs text-slate-500 space-y-1">
           <div className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-blue-500" /> You</div>
           <div className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-green-500" /> Friend</div>
@@ -151,8 +189,8 @@ export default function Map() {
         </div>
       </div>
 
-      {/* ── Map ── */}
-      <div className="flex-1 overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
+      {/* â”€â”€ Map â”€â”€ */}
+      <div className="flex-1 lg:self-start overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
         <MapContainer center={UF_CENTER} zoom={15} style={{ height: "32rem", width: "100%" }} className="z-0">
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -163,13 +201,13 @@ export default function Map() {
 
           {meetupData?.myLocation && (
             <Marker position={[meetupData.myLocation.lat, meetupData.myLocation.lng]} icon={myIcon}>
-              <Popup>📍 You — {meetupData.myLocation.name}</Popup>
+              <Popup>ðŸ“ You â€” {meetupData.myLocation.name}</Popup>
             </Marker>
           )}
 
           {meetupData?.friendLocation && (
             <Marker position={[meetupData.friendLocation.lat, meetupData.friendLocation.lng]} icon={friendIcon}>
-              <Popup>👤 {friendName} — {meetupData.friendLocation.name}</Popup>
+              <Popup>ðŸ‘¤ {friendName} â€” {meetupData.friendLocation.name}</Popup>
             </Marker>
           )}
 
