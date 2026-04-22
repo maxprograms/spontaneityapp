@@ -24,26 +24,6 @@ export default async function ProfilePage() {
 
   const roleLabel = user.role.charAt(0) + user.role.slice(1).toLowerCase();
 
-<<<<<<< HEAD
-    return (
-        <main className="min-h-screen bg-[#f5f5f7]">
-        <div className="px-4 py-12">
-            <div className="mx-auto max-w-3xl">
-                <div className="rounded-[28px] border border-black/10 bg-white px-8 py-12 shadow-sm">
-                    <div className="mx-auto flex h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-neutral-200">
-                        {user.image ? (
-                            <img
-                                src={user.image}
-                                alt={`${fullName} profile`}
-                                className="h-full w-full object-cover"
-                            />
-                        ) : (
-                            <span className="text-2xl font-semibold text-neutral-600">
-                                {initials || "U"}
-                            </span>
-                        )}
-                    </div>
-=======
   return (
     <main className="min-h-screen bg-[#f5f5f7] px-4 py-12">
       <div className="mx-auto max-w-3xl space-y-8">
@@ -62,7 +42,6 @@ export default async function ProfilePage() {
               </span>
             )}
           </div>
->>>>>>> befb8b462ae7cd4329bcd07eb959961aff82ce7c
 
           <div className="mt-6 flex items-center justify-center gap-3">
             <h1 className="text-center text-4xl font-bold tracking-tight text-black">
@@ -82,12 +61,6 @@ export default async function ProfilePage() {
               <h2 className="text-lg font-semibold text-black">Full Name</h2>
               <p className="mt-2 text-neutral-700">{fullName}</p>
             </div>
-<<<<<<< HEAD
-        </div>
-        </main>
-    );
-}
-=======
 
             <div className="rounded-2xl border border-black/10 bg-[#fafafa] p-6">
               <h2 className="text-lg font-semibold text-black">Email</h2>
@@ -109,4 +82,3 @@ export default async function ProfilePage() {
     </main>
   );
 }
->>>>>>> befb8b462ae7cd4329bcd07eb959961aff82ce7c
