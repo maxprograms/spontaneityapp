@@ -27,6 +27,84 @@ export const meetupRouter = createTRPCRouter({
       });
     }),
 
+  requestMeetup: protectedProcedure
+    .input(z.object({ friendId: z.string(), locationId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const friendship = await ctx.db.friendship.findFirst({
+        where: {
+          OR: [
+            { requesterId: ctx.session.user.id, addresseeId: input.friendId },
+            { requesterId: input.friendId, addresseeId: ctx.session.user.id },
+          ],
+        },
+      });
+      if (!friendship) throw new Error("Friendship not found");
+      return ctx.db.friendship.update({
+        where: { id: friendship.id },
+        data: { meetupLocationId: input.locationId, meetupStatus: "PENDING", meetupRequesterId: ctx.session.user.id },
+      });
+    }),
+
+  getMeetupRequest: protectedProcedure
+    .input(z.object({ friendId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const friendship = await ctx.db.friendship.findFirst({
+        where: {
+          OR: [
+            { requesterId: ctx.session.user.id, addresseeId: input.friendId },
+            { requesterId: input.friendId, addresseeId: ctx.session.user.id },
+          ],
+        },
+      });
+      if (!friendship?.meetupLocationId || !friendship?.meetupStatus) {
+        return { status: null, location: null, iAmRequester: false };
+      }
+      const allLocations = await getAllLocations();
+      const loc = allLocations.find(l => l.id === friendship.meetupLocationId);
+      const iAmRequester = friendship.meetupRequesterId === ctx.session.user.id;
+      return {
+        status: friendship.meetupStatus as "PENDING" | "ACCEPTED" | "DECLINED",
+        location: loc ? { id: loc.id, name: loc.name, lat: loc.latitude, lng: loc.longitude } : null,
+        iAmRequester,
+      };
+    }),
+
+  respondToMeetup: protectedProcedure
+    .input(z.object({ friendId: z.string(), accept: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const friendship = await ctx.db.friendship.findFirst({
+        where: {
+          OR: [
+            { requesterId: ctx.session.user.id, addresseeId: input.friendId },
+            { requesterId: input.friendId, addresseeId: ctx.session.user.id },
+          ],
+        },
+      });
+      if (!friendship) throw new Error("Friendship not found");
+      return ctx.db.friendship.update({
+        where: { id: friendship.id },
+        data: { meetupStatus: input.accept ? "ACCEPTED" : "DECLINED" },
+      });
+    }),
+
+  cancelMeetup: protectedProcedure
+    .input(z.object({ friendId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const friendship = await ctx.db.friendship.findFirst({
+        where: {
+          OR: [
+            { requesterId: ctx.session.user.id, addresseeId: input.friendId },
+            { requesterId: input.friendId, addresseeId: ctx.session.user.id },
+          ],
+        },
+      });
+      if (!friendship) throw new Error("Friendship not found");
+      return ctx.db.friendship.update({
+        where: { id: friendship.id },
+        data: { meetupLocationId: null, meetupStatus: null, meetupRequesterId: null },
+      });
+    }),
+
   getFriends: protectedProcedure.query(async ({ ctx }) => {
     const friends = await getFriends(ctx.session.user.id);
     return friends.filter((f) => f.friend.id !== ctx.session.user.id);

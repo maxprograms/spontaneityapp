@@ -49,12 +49,15 @@ model Schedule {
 
 // User to User relation
 model Friendship {
-  id          String           @id @default(cuid())
-  requesterId String
-  addresseeId String
-  status      FriendshipStatus @default(PENDING)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id               String           @id @default(cuid())
+  requesterId      String
+  addresseeId      String
+  status           FriendshipStatus @default(PENDING)
+  meetupLocationId  String?
+  meetupStatus      String?          // "PENDING" | "ACCEPTED" | "DECLINED"
+  meetupRequesterId String?          // who sent the meetup suggestion
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
   requester User @relation("FriendRequester", fields: [requesterId], references: [id], onDelete: Cascade)
   addressee User @relation("FriendAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
