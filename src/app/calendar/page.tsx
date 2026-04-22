@@ -234,15 +234,12 @@ export default function CalendarPage() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-t border-gray-100">
-        <div className="mx-auto px-6 py-4">
+      <header className="bg-white shadow-sm">
+        <div className="mx-auto flex items-center justify-between px-6 py-4">
           <h1 className="text-2xl font-bold text-gray-900">Calendar</h1>
-<<<<<<< HEAD
-=======
           <Link href="/" className="text-purple-600 hover:underline">
             ← Back to Home
           </Link>
->>>>>>> befb8b462ae7cd4329bcd07eb959961aff82ce7c
         </div>
       </header>
 
