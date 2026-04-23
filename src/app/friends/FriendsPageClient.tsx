@@ -546,13 +546,10 @@ function FriendsTab({
                 key={friendshipId}
                 className="group flex items-center gap-4 rounded-2xl border border-black/10 bg-[#fafafa] p-4"
               >
-                <a
-                  href={`/profile/${friend.id}`}
-                  className="flex min-w-0 flex-1 items-center gap-4"
-                >
+                <div className="flex min-w-0 flex-1 items-center gap-4">
                   <Avatar image={friend.image} name={initials(friend)} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold text-black group-hover:text-[#050522]">
+                    <p className="truncate font-semibold text-black">
                       {name}
                     </p>
                     <p className="truncate text-sm text-neutral-500">
@@ -560,7 +557,7 @@ function FriendsTab({
                       {friend.bio && friend.bio.length > 50 ? "…" : ""}
                     </p>
                   </div>
-                </a>
+                </div>
 
                 {/* Unfriend with confirm step */}
                 {confirmUnfriend === friendshipId ? (
