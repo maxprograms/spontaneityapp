@@ -128,6 +128,28 @@ async function fetchGoogleCalendarEvents(
   return data.items ?? [];
 }
 
+async function resolveBuildingCode(
+  locationName: string | null | undefined,
+  db: PrismaClient,
+): Promise<string | null> {
+  if (!locationName) return null;
+
+  if (/[a-z]/.test(locationName)) {
+    const loc = await db.location.findFirst({
+      where: { name: locationName },
+      select: { buildingCode: true },
+    });
+    return loc?.buildingCode ?? null;
+  }
+
+  const spaceIdx = locationName.indexOf(" ");
+  if (spaceIdx !== -1) {
+    return locationName.substring(0, spaceIdx);
+  }
+
+  return locationName;
+}
+
 // ── Router ───────────────────────────────────────────────────────────────────
 
 export const scheduleRouter = createTRPCRouter({
@@ -288,7 +310,7 @@ export const scheduleRouter = createTRPCRouter({
         const startDateTime = new Date(startStr);
         const endDateTime = new Date(endStr);
 
-        const buildingCode = event.location?.match(/^[A-Z]+/)?.[0] ?? null;
+        const buildingCode = await resolveBuildingCode(event.location, ctx.db);
 
         await ctx.db.schedule.upsert({
           where: {
