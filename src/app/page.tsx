@@ -1,12 +1,6 @@
 import Link from "next/link";
 
-import { auth } from "~/server/auth";
-
 export default async function Home() {
-  const session = await auth();
-  //----- DEBUG ------
-  console.log("SESSION:", JSON.stringify(session, null, 2))
-
   return (
     <main className="flex min-h-screen flex-col">
       <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 text-white">
@@ -15,45 +9,6 @@ export default async function Home() {
           <div className="absolute bottom-20 right-10 h-48 w-48 rounded-full bg-pink-300 blur-3xl"></div>
           <div className="absolute top-1/2 left-1/2 h-40 w-40 rounded-full bg-purple-300 blur-3xl"></div>
         </div>
-
-        <nav className="relative z-10 flex items-center justify-between px-8 py-6">
-          <h1 className="text-2xl font-bold tracking-tight">Spontaneity</h1>
-          <div className="flex gap-4">
-            {session ? (
-            <>
-              <Link
-                href="/dashboard"
-                className="rounded-full bg-white px-6 py-2 font-semibold text-purple-900 transition hover:bg-white/90"
-              >
-                Dashboard
-              </Link>
-              {session.user.role === "ADMIN" && (
-                <Link
-                  href="/admin"
-                  className="rounded-full bg-white/10 px-6 py-2 font-semibold transition hover:bg-white/20"
-                >
-                  Admin
-                </Link>
-              )}
-            </>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="rounded-full bg-white/10 px-6 py-2 font-semibold transition hover:bg-white/20"
-                >
-                  Log in
-                </Link>
-                <Link
-                  href="/login"
-                  className="rounded-full bg-white px-6 py-2 font-semibold text-purple-900 transition hover:bg-white/90"
-                >
-                  Get Started
-                </Link>
-              </>
-            )}
-          </div>
-        </nav>
 
         <div className="relative z-10 mx-auto max-w-5xl px-8 py-24 text-center">
           <h2 className="text-5xl font-extrabold tracking-tight sm:text-7xl">
