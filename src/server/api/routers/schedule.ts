@@ -136,7 +136,7 @@ async function resolveBuildingCode(
 
   if (/[a-z]/.test(locationName)) {
     const loc = await db.location.findFirst({
-      where: { name: locationName },
+      where: { name: { equals: locationName, mode: "insensitive" } },
       select: { buildingCode: true },
     });
     return loc?.buildingCode ?? null;
@@ -186,11 +186,14 @@ export const scheduleRouter = createTRPCRouter({
         });
       }
 
+      const buildingCode = await resolveBuildingCode(input.location, ctx.db);
+
       return ctx.db.schedule.create({
         data: {
           userId: ctx.session.user.id,
           title: input.title,
           locationName: input.location,
+          buildingCode,
           status: AvailabilityStatus.UNAVAILABLE,
           startDateTime: input.startDateTime,
           endDateTime: input.endDateTime,
@@ -227,11 +230,16 @@ export const scheduleRouter = createTRPCRouter({
         });
       }
 
+      const buildingCode = input.location !== undefined
+        ? await resolveBuildingCode(input.location, ctx.db)
+        : undefined;
+
       return ctx.db.schedule.update({
         where: { id: input.id },
         data: {
           title: input.title,
           locationName: input.location,
+          buildingCode,
           startDateTime: input.startDateTime,
           endDateTime: input.endDateTime,
         },
