@@ -85,10 +85,9 @@ export default function FriendsSection({ friends }: FriendsSectionProps) {
             const initial = friend.firstName?.[0] ?? friend.name?.[0] ?? "?";
 
             return (
-              <a
+              <div
                 key={friendshipId}
-                href={`/profile/${friend.id}`}
-                className="group flex items-center gap-4 rounded-2xl border border-black/10 bg-[#fafafa] p-4 transition hover:border-[#050522]/20 hover:shadow-sm"
+                className="flex items-center gap-4 rounded-2xl border border-black/10 bg-[#fafafa] p-4"
               >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-200">
                   {friend.image ? (
@@ -104,7 +103,7 @@ export default function FriendsSection({ friends }: FriendsSectionProps) {
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold text-black group-hover:text-[#050522]">
+                  <p className="truncate font-semibold text-black">
                     {name}
                   </p>
                   <p className="truncate text-sm text-neutral-500">
@@ -112,20 +111,7 @@ export default function FriendsSection({ friends }: FriendsSectionProps) {
                     {friend.bio && friend.bio.length > 60 ? "…" : ""}
                   </p>
                 </div>
-                <svg
-                  className="h-5 w-5 shrink-0 text-neutral-300 transition group-hover:text-[#050522]"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                  />
-                </svg>
-              </a>
+              </div>
             );
           })}
         </div>
