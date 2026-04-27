@@ -1,29 +1,100 @@
-# Create T3 App
+# Spontaneity
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+Spontaneity is a web application designed to help college students coordinate spontaneous meetups based on shared availability and location. The goal of the app is to make it easier for students to see when friends are free, compare schedules, and plan casual meetups without needing long group chats or back-and-forth messages.
 
-## What's next? How do I make an app with this?
+## Live Demo
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+The deployed application is available here:
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+[Spontaneity Web App](https://spontaneityapp.vercel.app/)
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+> **Note:** Google sign-in is currently limited to approved test users because the application is still using a development/testing Google OAuth configuration. To request access, please contact the project team with the Google account email you would like to use.
 
-## Learn More
+## Features
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+- Google authentication for secure sign-in
+- User profiles with name, email, role, bio, and profile image
+- Availability and schedule management
+- Google Calendar-based schedule integration
+- Location/building-based availability information
+- Role-based access control for regular users and admins
+- Backend database management using Prisma and PostgreSQL
+- Deployment through Vercel
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+## Tech Stack
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+- **Frontend:** Next.js, React, Tailwind CSS
+- **Backend:** Next.js server functions / server-side queries
+- **Authentication:** NextAuth with Google OAuth
+- **Database:** PostgreSQL
+- **ORM:** Prisma
+- **Validation/Configuration:** Zod and environment variables
+- **Deployment:** Vercel
 
-## How do I deploy this?
+## Project Purpose
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+Many students have unpredictable schedules and often miss opportunities to meet with friends because it is difficult to know who is available at a given time. Spontaneity solves this by allowing users to manage their availability and quickly identify opportunities for casual meetups.
+
+## Development Setup
+
+Clone the repository:
+
+```bash
+git clone <repository-url>
+cd <repository-name>
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create a `.env` file in the project root and add the required environment variables:
+
+```env
+DATABASE_URL="your-database-url"
+AUTH_SECRET="your-auth-secret"
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+```
+
+Generate the Prisma client:
+
+```bash
+npx prisma generate
+```
+
+Apply the Prisma schema to the database:
+
+```bash
+npx prisma db push
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Then open the application at:
+
+```text
+http://localhost:3000
+```
+
+## Project Structure
+
+```text
+src/
+├── app/              # Application pages and routes
+├── server/           # Server-side logic, auth, database, and queries
+├── styles/           # Global styles
+
+prisma/
+├── schema.prisma     # Prisma database schema
+```
+
+## Notes
+
+This project was developed as part of a software engineering course team project. The application uses the T3 stack with Next.js, NextAuth, Prisma, PostgreSQL, and Tailwind CSS.
